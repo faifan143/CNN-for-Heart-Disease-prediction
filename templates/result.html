@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heart Disease Prediction Results</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3a0ca3;
+        --accent-color: #f72585;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --success-color: #4cc9f0;
+        --warning-color: #ffbe0b;
+        --danger-color: #f94144;
+        --success-bg: #d1e7dd;
+        --danger-bg: #f8d7da;
+      }
+
+      body {
+        background: linear-gradient(
+          135deg,
+          var(--light-color) 0%,
+          #e9f3ff 100%
+        );
+        min-height: 100vh;
+        padding: 2rem 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+      }
+
+      .header h1 {
+        color: var(--secondary-color);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+      }
+
+      .subtitle {
+        color: var(--dark-color);
+        font-size: 1.25rem;
+        max-width: 600px;
+        margin: 0 auto;
+        opacity: 0.8;
+      }
+
+      .result-container {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .result-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--accent-color)
+        );
+      }
+
+      .section-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin: 1.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+      }
+
+      .section-title i {
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+      }
+
+      .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        border-radius: 8px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+      }
+
+      .result-card {
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+      }
+
+      .result-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .result-card.positive {
+        background-color: var(--danger-bg);
+        border: 1px solid rgba(247, 37, 133, 0.2);
+      }
+
+      .result-card.negative {
+        background-color: var(--success-bg);
+        border: 1px solid rgba(76, 201, 240, 0.2);
+      }
+
+      .verdict-badge {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white;
+        margin-top: 0.75rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(247, 37, 133, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(247, 37, 133, 0);
+        }
+      }
+
+      .verdict-badge.positive {
+        background: linear-gradient(
+          90deg,
+          var(--danger-color),
+          var(--accent-color)
+        );
+      }
+
+      .verdict-badge.negative {
+        background: linear-gradient(
+          90deg,
+          var(--success-color),
+          var(--primary-color)
+        );
+        animation: pulse-blue 2s infinite;
+      }
+
+      @keyframes pulse-blue {
+        0% {
+          box-shadow: 0 0 0 0 rgba(76, 201, 240, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(76, 201, 240, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(76, 201, 240, 0);
+        }
+      }
+
+      .patient-info {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+      }
+
+      .info-value {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .model-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .model-card.positive {
+        border-left: 5px solid var(--danger-color);
+      }
+
+      .model-card.negative {
+        border-left: 5px solid var(--success-color);
+      }
+
+      .model-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .model-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        margin-right: 1rem;
+        font-size: 1.75rem;
+      }
+
+      .model-icon.dt {
+        background-color: #e9f3ff;
+        color: var(--primary-color);
+      }
+
+      .model-icon.nn {
+        background-color: #fff0f6;
+        color: var(--accent-color);
+      }
+
+      .model-icon.xgb {
+        background-color: #fff9db;
+        color: var(--warning-color);
+      }
+
+      .model-icon.svm {
+        background-color: #f1f3f5;
+        color: #6c757d;
+      }
+
+      .model-icon.cnn {
+        background-color: #e3fafc;
+        color: var(--success-color);
+      }
+
+      .model-name {
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin: 0;
+      }
+
+      .progress-container {
+        position: relative;
+        margin-top: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .progress {
+        height: 28px;
+        border-radius: 50px;
+        margin-bottom: 0.5rem;
+        background-color: #e9ecef;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: visible;
+      }
+
+      .progress-bar {
+        font-size: 0.9rem;
+        font-weight: 700;
+        padding: 0 1rem;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: visible;
+        z-index: 1;
+        transition: width 1.5s ease;
+      }
+
+      .progress-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      .progress-bar.bg-danger {
+        background: linear-gradient(90deg, #f72585, #f94144) !important;
+      }
+
+      .progress-bar.bg-success {
+        background: linear-gradient(90deg, #4cc9f0, #4361ee) !important;
+      }
+
+      .progress-percent {
+        position: absolute;
+        right: -5px;
+        top: -30px;
+        background: var(--dark-color);
+        color: white;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        transform: translateX(50%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+      }
+
+      .progress-percent::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid var(--dark-color);
+      }
+
+      .verdict-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: heartbeat 1.5s infinite;
+      }
+
+      @keyframes heartbeat {
+        0% {
+          transform: scale(1);
+        }
+        14% {
+          transform: scale(1.1);
+        }
+        28% {
+          transform: scale(1);
+        }
+        42% {
+          transform: scale(1.1);
+        }
+        70% {
+          transform: scale(1);
+        }
+      }
+
+      .result-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .models-summary {
+        flex: 1;
+        text-align: center;
+      }
+
+      .models-count {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(
+          45deg,
+          var(--primary-color),
+          var(--accent-color)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+        line-height: 1;
+      }
+
+      .models-label {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+      }
+
+      .verdict-display {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .model-indicator {
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+      }
+
+      .model-indicator.positive {
+        background-color: var(--danger-color);
+      }
+
+      .model-indicator.negative {
+        background-color: var(--success-color);
+      }
+
+      .medical-disclaimer {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 2rem;
+      }
+
+      .parameter-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+
+      .parameter-icon {
+        width: 38px;
+        height: 38px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+        color: var(--primary-color);
+      }
+
+      .parameter-label {
+        font-weight: 600;
+        margin-right: 0.5rem;
+        color: #6c757d;
+      }
+
+      .parameter-value {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .critical-value {
+        color: var(--danger-color);
+        background-color: rgba(247, 37, 133, 0.1);
+        padding: 0.1rem 0.5rem;
+        border-radius: 4px;
+      }
+
+      .normal-value {
+        color: var(--success-color);
+        background-color: rgba(76, 201, 240, 0.1);
+        padding: 0.1rem 0.5rem;
+        border-radius: 4px;
+      }
+
+      .model-prediction {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+
+      .model-prediction.positive {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger-color);
+      }
+
+      .model-prediction.negative {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success-color);
+      }
+
+      .confidence-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: block;
+      }
+
+      .disclaimer-card {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 2rem;
+        border-left: 4px solid var(--warning-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container main-container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="header">
+            <h1>
+              <i class="bi bi-heart-pulse-fill text-danger"></i> Heart Disease
+              Analysis
+            </h1>
+            <p class="subtitle">
+              Comprehensive assessment using 5 advanced machine learning models
+            </p>
+          </div>
+
+          <div class="result-container">
+            <!-- Model Count Summary -->
+            <div class="result-summary">
+              <div class="models-summary">
+                <h3 class="models-count">
+                  {{ positive_count }}/{{ total_models }}
+                </h3>
+                <p class="models-label">models predict heart disease</p>
+              </div>
+
+              <div class="verdict-display">
+                {% if results.ensemble.class == 0 %}
+                <div class="verdict-icon text-danger">
+                  <i class="bi bi-heart-pulse-fill"></i>
+                </div>
+                {% else %}
+                <div class="verdict-icon text-success">
+                  <i class="bi bi-heart-fill"></i>
+                </div>
+                {% endif %}
+
+                <div
+                  class="verdict-badge {% if results.ensemble.class == 0 %}positive{% else %}negative{% endif %}"
+                >
+                  <i
+                    class="bi {% if results.ensemble.class == 0 %}bi-exclamation-triangle-fill{% else %}bi-shield-check{% endif %} me-2"
+                  ></i>
+                  {{ results.ensemble.label }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Patient Information -->
+            <h4 class="section-title">
+              <i class="bi bi-person-badge-fill"></i>Patient Profile
+            </h4>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="patient-info">
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-calendar3"></i>
+                    </div>
+                    <span class="parameter-label">Age:</span>
+                    <span
+                      class="parameter-value {% if data.age > 60 %}critical-value{% endif %}"
+                      >{{ data.age }}</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-gender-ambiguous"></i>
+                    </div>
+                    <span class="parameter-label">Sex:</span>
+                    <span class="parameter-value"
+                      >{% if data.sex == 1 %}Male{% else %}Female{% endif
+                      %}</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-thermometer-half"></i>
+                    </div>
+                    <span class="parameter-label">Chest Pain:</span>
+                    <span
+                      class="parameter-value {% if data.cp == 3 %}critical-value{% endif %}"
+                    >
+                      {% if data.cp == 0 %}Typical Angina {% elif data.cp == 1
+                      %}Atypical Angina {% elif data.cp == 2 %}Non-anginal Pain
+                      {% else %}Asymptomatic{% endif %}
+                    </span>
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-heart-pulse"></i>
+                    </div>
+                    <span class="parameter-label">Resting BP:</span>
+                    <span
+                      class="parameter-value {% if data.trestbps > 140 %}critical-value{% else %}normal-value{% endif %}"
+                      >{{ data.trestbps }} mmHg</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-droplet-fill"></i>
+                    </div>
+                    <span class="parameter-label">Cholesterol:</span>
+                    <span
+                      class="parameter-value {% if data.chol > 240 %}critical-value{% else %}normal-value{% endif %}"
+                      >{{ data.chol }} mg/dl</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="patient-info">
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-droplet-half"></i>
+                    </div>
+                    <span class="parameter-label">Fasting Blood Sugar:</span>
+                    <span
+                      class="parameter-value {% if data.fbs == 1 %}critical-value{% else %}normal-value{% endif %}"
+                      >{% if data.fbs == 1 %}> 120 mg/dl{% else %}≤ 120 mg/dl{%
+                      endif %}</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-activity"></i>
+                    </div>
+                    <span class="parameter-label">Max Heart Rate:</span>
+                    <span
+                      class="parameter-value {% if data.thalach < 150 %}critical-value{% else %}normal-value{% endif %}"
+                      >{{ data.thalach }} bpm</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <span class="parameter-label">Exercise Angina:</span>
+                    <span
+                      class="parameter-value {% if data.exang == 1 %}critical-value{% else %}normal-value{% endif %}"
+                      >{% if data.exang == 1 %}Yes{% else %}No{% endif %}</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-arrow-down-right"></i>
+                    </div>
+                    <span class="parameter-label">ST Depression:</span>
+                    <span
+                      class="parameter-value {% if data.oldpeak > 1.5 %}critical-value{% else %}normal-value{% endif %}"
+                      >{{ data.oldpeak }}</span
+                    >
+                  </div>
+
+                  <div class="parameter-item">
+                    <div class="parameter-icon">
+                      <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                    <span class="parameter-label">Major Vessels:</span>
+                    <span
+                      class="parameter-value {% if data.ca > 0 %}critical-value{% else %}normal-value{% endif %}"
+                      >{{ data.ca }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Individual Model Results -->
+            <h4 class="section-title">
+              <i class="bi bi-robot"></i>Model Predictions
+            </h4>
+
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+              <!-- Neural Network -->
+              <div class="col">
+                <div
+                  class="model-card {% if results.neural_network.class == 0 %}positive{% else %}negative{% endif %}"
+                >
+                  <div class="model-header">
+                    <div class="model-icon nn">
+                      <i class="bi bi-braces"></i>
+                    </div>
+                    <div>
+                      <h5 class="model-name">Neural Network</h5>
+                      <span
+                        class="model-prediction {% if results.neural_network.class == 0 %}positive{% else %}negative{% endif %}"
+                      >
+                        {{ results.neural_network.label }}
+                      </span>
+                    </div>
+                  </div>
+                  {% if results.neural_network.probability is not none %}
+                  <div class="progress-container">
+                    <div class="progress-percent">
+                      {{ results.neural_network.probability }}%
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar {% if results.neural_network.class == 0 %}bg-danger{% else %}bg-success{% endif %}"
+                        role="progressbar"
+                        style="width: {{ results.neural_network.probability }}%"
+                        aria-valuenow="{{ results.neural_network.probability }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <span class="confidence-label">Confidence level</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- XGBoost -->
+              <div class="col">
+                <div
+                  class="model-card {% if results.xgboost.class == 0 %}positive{% else %}negative{% endif %}"
+                >
+                  <div class="model-header">
+                    <div class="model-icon xgb">
+                      <i class="bi bi-diagram-2"></i>
+                    </div>
+                    <div>
+                      <h5 class="model-name">XGBoost</h5>
+                      <span
+                        class="model-prediction {% if results.xgboost.class == 0 %}positive{% else %}negative{% endif %}"
+                      >
+                        {{ results.xgboost.label }}
+                      </span>
+                    </div>
+                  </div>
+                  {% if results.xgboost.probability is not none %}
+                  <div class="progress-container">
+                    <div class="progress-percent">
+                      {{ results.xgboost.probability }}%
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar {% if results.xgboost.class == 0 %}bg-danger{% else %}bg-success{% endif %}"
+                        role="progressbar"
+                        style="width: {{ results.xgboost.probability }}%"
+                        aria-valuenow="{{ results.xgboost.probability }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <span class="confidence-label">Confidence level</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- CNN -->
+              <div class="col">
+                <div
+                  class="model-card {% if results.cnn.class == 0 %}positive{% else %}negative{% endif %}"
+                >
+                  <div class="model-header">
+                    <div class="model-icon cnn">
+                      <i class="bi bi-cpu"></i>
+                    </div>
+                    <div>
+                      <h5 class="model-name">CNN</h5>
+                      <span
+                        class="model-prediction {% if results.cnn.class == 0 %}positive{% else %}negative{% endif %}"
+                      >
+                        {{ results.cnn.label }}
+                      </span>
+                    </div>
+                  </div>
+                  {% if results.cnn.probability is not none %}
+                  <div class="progress-container">
+                    <div class="progress-percent">
+                      {{ results.cnn.probability }}%
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar {% if results.cnn.class == 0 %}bg-danger{% else %}bg-success{% endif %}"
+                        role="progressbar"
+                        style="width: {{ results.cnn.probability }}%"
+                        aria-valuenow="{{ results.cnn.probability }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <span class="confidence-label">Confidence level</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- SVM -->
+              <div class="col">
+                <div
+                  class="model-card {% if results.svm.class == 0 %}positive{% else %}negative{% endif %}"
+                >
+                  <div class="model-header">
+                    <div class="model-icon svm">
+                      <i class="bi bi-grid-3x3-gap"></i>
+                    </div>
+                    <div>
+                      <h5 class="model-name">SVM</h5>
+                      <span
+                        class="model-prediction {% if results.svm.class == 0 %}positive{% else %}negative{% endif %}"
+                      >
+                        {{ results.svm.label }}
+                      </span>
+                    </div>
+                  </div>
+                  {% if results.svm.probability is not none %}
+                  <div class="progress-container">
+                    <div class="progress-percent">
+                      {{ results.svm.probability }}%
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar {% if results.svm.class == 0 %}bg-danger{% else %}bg-success{% endif %}"
+                        role="progressbar"
+                        style="width: {{ results.svm.probability }}%"
+                        aria-valuenow="{{ results.svm.probability }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <span class="confidence-label">Confidence level</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Decision Tree -->
+            <div
+              class="model-card {% if results.decision_tree.class == 0 %}positive{% else %}negative{% endif %}"
+            >
+              <div class="model-header">
+                <div class="model-icon dt">
+                  <i class="bi bi-diagram-3"></i>
+                </div>
+                <div>
+                  <h5 class="model-name">Decision Tree</h5>
+                  <span
+                    class="model-prediction {% if results.decision_tree.class == 0 %}positive{% else %}negative{% endif %}"
+                  >
+                    {{ results.decision_tree.label }}
+                  </span>
+                </div>
+              </div>
+              <div class="mt-3">
+                <span class="confidence-label"
+                  >Decision trees don't provide probability estimates</span
+                >
+              </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclaimer-card mt-4">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-info-circle-fill text-warning me-2"></i>
+                <small
+                  >This analysis is for educational purposes only and should not
+                  replace professional medical advice. Always consult with a
+                  healthcare provider for proper diagnosis.</small
+                >
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-3 mt-4">
+              <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <a href="/" class="btn btn-primary w-100">
+                    <i class="bi bi-arrow-left me-2"></i>Predict Another Patient
+                  </a>
+                </div>
+                <div class="col-md-6">
+                  <a href="/presets" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-people-fill me-2"></i>Use Patient Presets
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Add animation to progress bars when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        // Wait a short moment before starting animations
+        setTimeout(function () {
+          // Animate progress bars
+          const progressBars = document.querySelectorAll(".progress-bar");
+          progressBars.forEach((bar) => {
+            const targetWidth = bar.getAttribute("aria-valuenow") + "%";
+            // First set to 0 to enable animation
+            bar.style.width = "0%";
+
+            // Force reflow
+            bar.offsetWidth;
+
+            // Set to target value to trigger animation
+            bar.style.width = targetWidth;
+          });
+
+          // Highlight critical values with subtle animation
+          const criticalValues = document.querySelectorAll(".critical-value");
+          criticalValues.forEach((el) => {
+            el.classList.add("animate__animated", "animate__pulse");
+          });
+        }, 300);
+      });
+    </script>
+  </body>
+</html>
