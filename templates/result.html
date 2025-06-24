@@ -291,11 +291,6 @@
         color: var(--accent-color);
       }
 
-      .model-icon.xgb {
-        background-color: #fff9db;
-        color: var(--warning-color);
-      }
-
       .model-icon.svm {
         background-color: #f1f3f5;
         color: #6c757d;
@@ -583,7 +578,7 @@
               Analysis
             </h1>
             <p class="subtitle">
-              Comprehensive assessment using 5 advanced machine learning models
+              Comprehensive assessment using 4 advanced machine learning models
             </p>
           </div>
 
@@ -792,45 +787,6 @@
                 </div>
               </div>
 
-              <!-- XGBoost -->
-              <div class="col">
-                <div
-                  class="model-card {% if results.xgboost.class == 0 %}positive{% else %}negative{% endif %}"
-                >
-                  <div class="model-header">
-                    <div class="model-icon xgb">
-                      <i class="bi bi-diagram-2"></i>
-                    </div>
-                    <div>
-                      <h5 class="model-name">XGBoost</h5>
-                      <span
-                        class="model-prediction {% if results.xgboost.class == 0 %}positive{% else %}negative{% endif %}"
-                      >
-                        {{ results.xgboost.label }}
-                      </span>
-                    </div>
-                  </div>
-                  {% if results.xgboost.probability is not none %}
-                  <div class="progress-container">
-                    <div class="progress-percent">
-                      {{ results.xgboost.probability }}%
-                    </div>
-                    <div class="progress">
-                      <div
-                        class="progress-bar {% if results.xgboost.class == 0 %}bg-danger{% else %}bg-success{% endif %}"
-                        role="progressbar"
-                        style="width: {{ results.xgboost.probability }}%"
-                        aria-valuenow="{{ results.xgboost.probability }}"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                      ></div>
-                    </div>
-                    <span class="confidence-label">Confidence level</span>
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
-
               <!-- CNN -->
               <div class="col">
                 <div
@@ -908,29 +864,31 @@
                   {% endif %}
                 </div>
               </div>
-            </div>
 
-            <!-- Decision Tree -->
-            <div
-              class="model-card {% if results.decision_tree.class == 0 %}positive{% else %}negative{% endif %}"
-            >
-              <div class="model-header">
-                <div class="model-icon dt">
-                  <i class="bi bi-diagram-3"></i>
-                </div>
-                <div>
-                  <h5 class="model-name">Decision Tree</h5>
-                  <span
-                    class="model-prediction {% if results.decision_tree.class == 0 %}positive{% else %}negative{% endif %}"
-                  >
-                    {{ results.decision_tree.label }}
-                  </span>
-                </div>
-              </div>
-              <div class="mt-3">
-                <span class="confidence-label"
-                  >Decision trees don't provide probability estimates</span
+              <!-- Decision Tree -->
+              <div class="col">
+                <div
+                  class="model-card {% if results.decision_tree.class == 0 %}positive{% else %}negative{% endif %}"
                 >
+                  <div class="model-header">
+                    <div class="model-icon dt">
+                      <i class="bi bi-diagram-3"></i>
+                    </div>
+                    <div>
+                      <h5 class="model-name">Decision Tree</h5>
+                      <span
+                        class="model-prediction {% if results.decision_tree.class == 0 %}positive{% else %}negative{% endif %}"
+                      >
+                        {{ results.decision_tree.label }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <span class="confidence-label"
+                      >Decision trees don't provide probability estimates</span
+                    >
+                  </div>
+                </div>
               </div>
             </div>
 
