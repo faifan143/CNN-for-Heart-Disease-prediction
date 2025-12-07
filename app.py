@@ -55,11 +55,20 @@ def preprocess_input(data):
 
 @app.route('/', methods=['GET'])
 def home():
-    return render_template('index.html')
+    lang = request.args.get('lang') or 'en'
+    return render_template('index.html', lang=lang)
+
+@app.route('/presets', methods=['GET'])
+def presets():
+    lang = request.args.get('lang') or 'en'
+    return render_template('presets.html', lang=lang)
+
+
 
 @app.route('/predict_ui', methods=['POST'])
 def predict_ui():
     try:
+        lang = request.form.get('lang') or request.args.get('lang') or 'en'
         data = {
             'age': int(request.form['age']),
             'sex': int(request.form['sex']),
@@ -77,7 +86,7 @@ def predict_ui():
         }
         inputs, error = preprocess_input(data)
         if error:
-            return render_template('error.html', error=error)
+            return render_template('error.html', error=error, lang=lang)
         dt_pred = int(decision_tree.predict(inputs['raw'])[0])
         nn_pred = int(neural_network.predict(inputs['scaled'])[0])
         svm_pred = int(svm.predict(inputs['scaled'])[0])
@@ -114,60 +123,58 @@ def predict_ui():
             }
         }
         positive_count = sum([1 for model, result in results.items() if model != 'ensemble' and result['class'] == 0])
-        return render_template('result.html', results=results, data=data, positive_count=positive_count, total_models=4)
+        return render_template('result.html', results=results, data=data, positive_count=positive_count, total_models=4, lang=lang)
     except Exception as e:
-        return render_template('error.html', error=str(e))
+        lang = request.form.get('lang') or request.args.get('lang') or 'en'
+        return render_template('error.html', error=str(e), lang=lang)
 
-@app.route('/api/predict', methods=['POST'])
-def predict_api():
-    try:
-        data = request.json
-        inputs, error = preprocess_input(data)
-        if error:
-            return jsonify({'error': error}), 400
-        dt_pred = int(decision_tree.predict(inputs['raw'])[0])
-        nn_pred = int(neural_network.predict(inputs['scaled'])[0])
-        svm_pred = int(svm.predict(inputs['scaled'])[0])
-        cnn_pred = int((cnn_model.predict(inputs['cnn']) > 0.5)[0][0])
-        predictions = [dt_pred, nn_pred, svm_pred, cnn_pred]
-        ensemble_pred = int(np.bincount(predictions).argmax())
-        nn_prob = float(neural_network.predict_proba(inputs['scaled'])[0][1])
-        svm_prob = float(svm.predict_proba(inputs['scaled'])[0][1])
-        cnn_prob = float(cnn_model.predict(inputs['cnn'])[0][0])
-        return jsonify({
-            'predictions': {
-                'decision_tree': {
-                    'class': dt_pred,
-                    'label': 'Heart Disease' if dt_pred == 0 else 'No Heart Disease'
-                },
-                'neural_network': {
-                    'class': nn_pred,
-                    'probability': (1 - nn_prob) if nn_pred == 0 else nn_prob,
-                    'label': 'Heart Disease' if nn_pred == 0 else 'No Heart Disease'
-                },
-                'svm': {
-                    'class': svm_pred,
-                    'probability': (1 - svm_prob) if svm_pred == 0 else svm_prob,
-                    'label': 'Heart Disease' if svm_pred == 0 else 'No Heart Disease'
-                },
-                'cnn': {
-                    'class': cnn_pred,
-                    'probability': (1 - cnn_prob) if cnn_pred == 0 else cnn_prob,
-                    'label': 'Heart Disease' if cnn_pred == 0 else 'No Heart Disease'
-                },
-                'ensemble': {
-                    'class': ensemble_pred,
-                    'label': 'Heart Disease' if ensemble_pred == 0 else 'No Heart Disease'
-                }
-            },
-            'input_data': data
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# @app.route('/api/predict', methods=['POST'])
+# def predict_api():
+#     try:
+#         data = request.json
+#         inputs, error = preprocess_input(data)
+#         if error:
+#             return jsonify({'error': error}), 400
+#         dt_pred = int(decision_tree.predict(inputs['raw'])[0])
+#         nn_pred = int(neural_network.predict(inputs['scaled'])[0])
+#         svm_pred = int(svm.predict(inputs['scaled'])[0])
+#         cnn_pred = int((cnn_model.predict(inputs['cnn']) > 0.5)[0][0])
+#         predictions = [dt_pred, nn_pred, svm_pred, cnn_pred]
+#         ensemble_pred = int(np.bincount(predictions).argmax())
+#         nn_prob = float(neural_network.predict_proba(inputs['scaled'])[0][1])
+#         svm_prob = float(svm.predict_proba(inputs['scaled'])[0][1])
+#         cnn_prob = float(cnn_model.predict(inputs['cnn'])[0][0])
+#         return jsonify({
+#             'predictions': {
+#                 'decision_tree': {
+#                     'class': dt_pred,
+#                     'label': 'Heart Disease' if dt_pred == 0 else 'No Heart Disease'
+#                 },
+#                 'neural_network': {
+#                     'class': nn_pred,
+#                     'probability': (1 - nn_prob) if nn_pred == 0 else nn_prob,
+#                     'label': 'Heart Disease' if nn_pred == 0 else 'No Heart Disease'
+#                 },
+#                 'svm': {
+#                     'class': svm_pred,
+#                     'probability': (1 - svm_prob) if svm_pred == 0 else svm_prob,
+#                     'label': 'Heart Disease' if svm_pred == 0 else 'No Heart Disease'
+#                 },
+#                 'cnn': {
+#                     'class': cnn_pred,
+#                     'probability': (1 - cnn_prob) if cnn_pred == 0 else cnn_prob,
+#                     'label': 'Heart Disease' if cnn_pred == 0 else 'No Heart Disease'
+#                 },
+#                 'ensemble': {
+#                     'class': ensemble_pred,
+#                     'label': 'Heart Disease' if ensemble_pred == 0 else 'No Heart Disease'
+#                 }
+#             },
+#             'input_data': data
+#         })
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
-@app.route('/presets', methods=['GET'])
-def presets():
-    return render_template('presets.html')
 
 if __name__ == '__main__':
     os.makedirs('templates', exist_ok=True)

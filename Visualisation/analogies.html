@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cool ML Analogies Interactive</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(
+          45deg,
+          #0f0f23 0%,
+          #1a1a3a 25%,
+          #2d1b69 50%,
+          #4a148c 75%,
+          #6a1b9a 100%
+        );
+        color: white;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      .header {
+        text-align: center;
+        padding: 50px 20px;
+        position: relative;
+      }
+
+      .header h1 {
+        font-size: 4em;
+        background: linear-gradient(
+          45deg,
+          #ff6b6b,
+          #ffd700,
+          #4ecdc4,
+          #45b7d1,
+          #ff6b6b
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: rainbow 5s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes rainbow {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      .subtitle {
+        font-size: 1.5em;
+        color: #ffd700;
+        margin-bottom: 30px;
+      }
+
+      .analogy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .analogy-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        backdrop-filter: blur(15px);
+        border: 2px solid transparent;
+        transition: all 0.5s ease;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        min-height: 400px;
+      }
+
+      .analogy-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transition: left 0.8s;
+      }
+
+      .analogy-card:hover::before {
+        left: 100%;
+      }
+
+      .analogy-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border-color: #ffd700;
+      }
+
+      .svm-card {
+        border-image: linear-gradient(45deg, #3498db, #2980b9) 1;
+      }
+
+      .tree-card {
+        border-image: linear-gradient(45deg, #27ae60, #229954) 1;
+      }
+
+      .nn-card {
+        border-image: linear-gradient(45deg, #9b59b6, #8e44ad) 1;
+      }
+
+      .cnn-card {
+        border-image: linear-gradient(45deg, #e67e22, #d35400) 1;
+      }
+
+      .card-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .card-title {
+        font-size: 2em;
+        margin-bottom: 10px;
+      }
+
+      .card-subtitle {
+        font-size: 1.2em;
+        opacity: 0.8;
+        margin-bottom: 20px;
+      }
+
+      .analogy-visual {
+        text-align: center;
+        margin: 20px 0;
+        min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .bouncer-scene {
+        position: relative;
+        width: 100%;
+        height: 150px;
+      }
+
+      .bouncer {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3em;
+        animation: bounce 2s infinite;
+      }
+
+      .rope-line {
+        position: absolute;
+        top: 50%;
+        left: 20%;
+        right: 20%;
+        height: 3px;
+        background: linear-gradient(90deg, #3498db, #2980b9);
+        animation: glow-blue 2s infinite alternate;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+        }
+      }
+
+      @keyframes glow-blue {
+        from {
+          box-shadow: 0 0 10px #3498db;
+        }
+        to {
+          box-shadow: 0 0 20px #3498db;
+        }
+      }
+
+      .tree-scene {
+        position: relative;
+        width: 100%;
+        height: 150px;
+      }
+
+      .tree-trunk {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 60px;
+        background: #8b4513;
+        border-radius: 10px;
+      }
+
+      .tree-branch {
+        position: absolute;
+        background: #27ae60;
+        border-radius: 15px;
+        animation: grow 3s infinite;
+      }
+
+      .branch-1 {
+        left: 35%;
+        top: 30%;
+        width: 30px;
+        height: 30px;
+        animation-delay: 0s;
+      }
+
+      .branch-2 {
+        right: 35%;
+        top: 30%;
+        width: 30px;
+        height: 30px;
+        animation-delay: 0.5s;
+      }
+
+      .branch-3 {
+        left: 20%;
+        top: 60%;
+        width: 25px;
+        height: 25px;
+        animation-delay: 1s;
+      }
+
+      .branch-4 {
+        right: 20%;
+        top: 60%;
+        width: 25px;
+        height: 25px;
+        animation-delay: 1.5s;
+      }
+
+      @keyframes grow {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+      }
+
+      .brain-scene {
+        position: relative;
+        width: 100%;
+        height: 150px;
+      }
+
+      .neuron {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, #9b59b6, #8e44ad);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        animation: pulse 2s infinite;
+      }
+
+      .neuron-1 {
+        left: 10%;
+        top: 20%;
+        animation-delay: 0s;
+      }
+      .neuron-2 {
+        left: 10%;
+        top: 60%;
+        animation-delay: 0.3s;
+      }
+      .neuron-3 {
+        left: 40%;
+        top: 40%;
+        animation-delay: 0.6s;
+      }
+      .neuron-4 {
+        right: 10%;
+        top: 40%;
+        animation-delay: 0.9s;
+      }
+
+      .synapse {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, #9b59b6, #8e44ad);
+        animation: signal 2s infinite;
+      }
+
+      .synapse-1 {
+        left: 15%;
+        top: 38%;
+        width: 20%;
+        transform: rotate(20deg);
+      }
+
+      .synapse-2 {
+        left: 15%;
+        top: 58%;
+        width: 20%;
+        transform: rotate(-20deg);
+      }
+
+      .synapse-3 {
+        left: 45%;
+        top: 58%;
+        width: 40%;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px #9b59b6;
+        }
+        50% {
+          transform: scale(1.1);
+          box-shadow: 0 0 20px #9b59b6;
+        }
+      }
+
+      @keyframes signal {
+        0% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+          box-shadow: 0 0 15px #9b59b6;
+        }
+        100% {
+          opacity: 0.3;
+        }
+      }
+
+      .scanner-scene {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        background: linear-gradient(
+          45deg,
+          rgba(230, 126, 34, 0.1),
+          rgba(211, 84, 0, 0.1)
+        );
+      }
+
+      .data-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 5px;
+        width: 80%;
+        height: 80%;
+        margin: 10% auto;
+      }
+
+      .data-cell {
+        background: rgba(230, 126, 34, 0.3);
+        border-radius: 5px;
+        animation: scan 3s infinite;
+      }
+
+      .scanner-filter {
+        position: absolute;
+        top: 10%;
+        left: 0;
+        width: 25%;
+        height: 80%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(230, 126, 34, 0.5),
+          transparent
+        );
+        animation: move-scanner 3s infinite;
+      }
+
+      @keyframes scan {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+          box-shadow: 0 0 10px #e67e22;
+        }
+      }
+
+      @keyframes move-scanner {
+        0% {
+          left: 0;
+        }
+        100% {
+          left: 75%;
+        }
+      }
+
+      .analogy-text {
+        text-align: left;
+        line-height: 1.6;
+        margin-top: 20px;
+      }
+
+      .highlight {
+        background: linear-gradient(45deg, #ffd700, #f39c12);
+        color: #2c3e50;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+
+      .interactive-btn {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        margin: 10px 5px;
+        transition: all 0.3s ease;
+        font-size: 1em;
+      }
+
+      .interactive-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+      }
+
+      .popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .popup-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(45deg, #2c3e50, #34495e);
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: 2px solid #ffd700;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: #ffd700;
+        font-size: 2em;
+        cursor: pointer;
+      }
+
+      .comparison-table {
+        width: 100%;
+        margin: 20px 0;
+        border-collapse: collapse;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .comparison-table th {
+        background: rgba(255, 215, 0, 0.3);
+        font-weight: bold;
+      }
+
+      .nav-controls {
+        text-align: center;
+        margin: 30px 0;
+      }
+
+      .nav-btn {
+        background: linear-gradient(45deg, #ffd700, #f39c12);
+        color: #2c3e50;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 30px;
+        cursor: pointer;
+        margin: 0 10px;
+        font-size: 1.1em;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .nav-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+      }
+
+      .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .floating-icon {
+        position: absolute;
+        font-size: 2em;
+        opacity: 0.1;
+        animation: float 6s infinite;
+      }
+
+      .icon-1 {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+      .icon-2 {
+        top: 20%;
+        right: 15%;
+        animation-delay: 1s;
+      }
+      .icon-3 {
+        bottom: 30%;
+        left: 20%;
+        animation-delay: 2s;
+      }
+      .icon-4 {
+        bottom: 20%;
+        right: 10%;
+        animation-delay: 3s;
+      }
+      .icon-5 {
+        top: 50%;
+        left: 5%;
+        animation-delay: 4s;
+      }
+      .icon-6 {
+        top: 40%;
+        right: 5%;
+        animation-delay: 5s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-20px) rotate(90deg);
+        }
+        50% {
+          transform: translateY(-40px) rotate(180deg);
+        }
+        75% {
+          transform: translateY(-20px) rotate(270deg);
+        }
+      }
+
+      .particle-system {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #ffd700;
+        border-radius: 50%;
+        animation: particle-move 8s infinite linear;
+      }
+
+      @keyframes particle-move {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) translateX(100px);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="floating-elements">
+      <div class="floating-icon icon-1">🛡️</div>
+      <div class="floating-icon icon-2">🌳</div>
+      <div class="floating-icon icon-3">🧠</div>
+      <div class="floating-icon icon-4">🔍</div>
+      <div class="floating-icon icon-5">💖</div>
+      <div class="floating-icon icon-6">🏥</div>
+    </div>
+
+    <div class="particle-system" id="particles"></div>
+
+    <div class="header">
+      <h1>🎭 Cool ML Analogies 🎭</h1>
+      <div class="subtitle">
+        Interactive Visual Learning for Heart Disease Detection
+      </div>
+      <div class="nav-controls">
+        <button class="nav-btn" onclick="showComparison()">
+          📊 Compare All
+        </button>
+        <button class="nav-btn" onclick="startTour()">🎬 Guided Tour</button>
+        <button class="nav-btn" onclick="toggleParticles()">
+          ✨ Toggle Effects
+        </button>
+      </div>
+    </div>
+
+    <div class="analogy-grid">
+      <!-- SVM Card -->
+      <div class="analogy-card svm-card" onclick="showDetails('svm')">
+        <div class="card-header">
+          <div class="card-title">🛡️ SVM</div>
+          <div class="card-subtitle">"The Perfect Bouncer"</div>
+        </div>
+        <div class="analogy-visual">
+          <div class="bouncer-scene">
+            <div class="bouncer">🛡️</div>
+            <div class="rope-line"></div>
+            <div
+              style="position: absolute; left: 5%; top: 20%; font-size: 1.5em"
+            >
+              😊
+            </div>
+            <div
+              style="position: absolute; left: 5%; top: 70%; font-size: 1.5em"
+            >
+              😊
+            </div>
+            <div
+              style="position: absolute; right: 5%; top: 20%; font-size: 1.5em"
+            >
+              😷
+            </div>
+            <div
+              style="position: absolute; right: 5%; top: 70%; font-size: 1.5em"
+            >
+              😷
+            </div>
+          </div>
+        </div>
+        <div class="analogy-text">
+          <p>
+            <strong>🎯 The Analogy:</strong> SVM is like the world's most fair
+            bouncer at "Healthy Hearts Club"
+          </p>
+          <p>
+            <strong>🔧 How it works:</strong> Draws the
+            <span class="highlight">perfect rope line</span> with maximum space
+            between healthy and diseased patients
+          </p>
+          <p>
+            <strong>⭐ Special Power:</strong> Only listens to the "VIP
+            patients" (support vectors) right at the boundary
+          </p>
+          <button class="interactive-btn" onclick="animateBouncer(event)">
+            🎬 See Bouncer in Action
+          </button>
+        </div>
+      </div>
+
+      <!-- Decision Tree Card -->
+      <div class="analogy-card tree-card" onclick="showDetails('tree')">
+        <div class="card-header">
+          <div class="card-title">🌳 Decision Tree</div>
+          <div class="card-subtitle">"The 20 Questions Master"</div>
+        </div>
+        <div class="analogy-visual">
+          <div class="tree-scene">
+            <div class="tree-trunk"></div>
+            <div class="tree-branch branch-1">Age?</div>
+            <div class="tree-branch branch-2">Pain?</div>
+            <div class="tree-branch branch-3">✅</div>
+            <div class="tree-branch branch-4">❌</div>
+          </div>
+        </div>
+        <div class="analogy-text">
+          <p>
+            <strong>🎯 The Analogy:</strong> Like a master detective playing 20
+            questions to solve medical mysteries
+          </p>
+          <p>
+            <strong>🔧 How it works:</strong> Asks the
+            <span class="highlight">perfect sequence</span> of yes/no questions
+            until diagnosis is clear
+          </p>
+          <p>
+            <strong>⭐ Special Power:</strong> Every decision can be explained
+            step-by-step like a medical textbook
+          </p>
+          <button class="interactive-btn" onclick="growTree(event)">
+            🌱 Watch Tree Grow
+          </button>
+        </div>
+      </div>
+
+      <!-- Neural Network Card -->
+      <div class="analogy-card nn-card" onclick="showDetails('nn')">
+        <div class="card-header">
+          <div class="card-title">🧠 Neural Network</div>
+          <div class="card-subtitle">"The Deep Thinker"</div>
+        </div>
+        <div class="analogy-visual">
+          <div class="brain-scene">
+            <div class="neuron neuron-1">A</div>
+            <div class="neuron neuron-2">B</div>
+            <div class="neuron neuron-3">H</div>
+            <div class="neuron neuron-4">?</div>
+            <div class="synapse synapse-1"></div>
+            <div class="synapse synapse-2"></div>
+            <div class="synapse synapse-3"></div>
+          </div>
+        </div>
+        <div class="analogy-text">
+          <p>
+            <strong>🎯 The Analogy:</strong> Like a brilliant doctor who learns
+            from thousands of cases
+          </p>
+          <p>
+            <strong>🔧 How it works:</strong> Layers of artificial neurons
+            discover <span class="highlight">hidden patterns</span> in patient
+            data
+          </p>
+          <p>
+            <strong>⭐ Special Power:</strong> Automatically learns complex
+            relationships without being explicitly programmed
+          </p>
+          <button class="interactive-btn" onclick="fireNeurons(event)">
+            ⚡ Fire Neurons
+          </button>
+        </div>
+      </div>
+
+      <!-- CNN Card -->
+      <div class="analogy-card cnn-card" onclick="showDetails('cnn')">
+        <div class="card-header">
+          <div class="card-title">🔍 CNN</div>
+          <div class="card-subtitle">"The Pattern Scanner"</div>
+        </div>
+        <div class="analogy-visual">
+          <div class="scanner-scene">
+            <div class="data-grid">
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+              <div class="data-cell"></div>
+            </div>
+            <div class="scanner-filter"></div>
+          </div>
+        </div>
+        <div class="analogy-text">
+          <p>
+            <strong>🎯 The Analogy:</strong> Like a medical scanner that detects
+            patterns by sliding over patient data
+          </p>
+          <p>
+            <strong>🔧 How it works:</strong> Uses
+            <span class="highlight">convolution filters</span> to find local
+            feature combinations
+          </p>
+          <p>
+            <strong>⭐ Special Power:</strong> Discovers how medical symptoms
+            work together in spatial patterns
+          </p>
+          <button class="interactive-btn" onclick="scanPattern(event)">
+            🔍 Start Scanning
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Modal -->
+    <div class="popup-overlay" id="popupOverlay">
+      <div class="popup-content">
+        <button class="close-btn" onclick="closePopup()">&times;</button>
+        <div id="popupContent"></div>
+      </div>
+    </div>
+
+    <script>
+      // Particle system
+      function createParticles() {
+        const particleSystem = document.getElementById("particles");
+
+        setInterval(() => {
+          if (particleSystem.children.length < 50) {
+            const particle = document.createElement("div");
+            particle.className = "particle";
+            particle.style.left = Math.random() * 100 + "%";
+            particle.style.animationDuration = Math.random() * 3 + 5 + "s";
+            particle.style.animationDelay = Math.random() * 2 + "s";
+            particleSystem.appendChild(particle);
+
+            setTimeout(() => {
+              if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+              }
+            }, 8000);
+          }
+        }, 200);
+      }
+
+      let particlesEnabled = true;
+      function toggleParticles() {
+        const particles = document.getElementById("particles");
+        if (particlesEnabled) {
+          particles.style.display = "none";
+          particlesEnabled = false;
+        } else {
+          particles.style.display = "block";
+          particlesEnabled = true;
+        }
+      }
+
+      // Interactive animations
+      function animateBouncer(event) {
+        event.stopPropagation();
+        const bouncer = event.target
+          .closest(".analogy-card")
+          .querySelector(".bouncer");
+        bouncer.style.animation = "none";
+        setTimeout(() => {
+          bouncer.style.animation = "bounce 0.5s ease 3";
+        }, 10);
+      }
+
+      function growTree(event) {
+        event.stopPropagation();
+        const branches = event.target
+          .closest(".analogy-card")
+          .querySelectorAll(".tree-branch");
+        branches.forEach((branch, index) => {
+          branch.style.animation = "none";
+          setTimeout(() => {
+            branch.style.animation = `grow 1s ease ${index * 0.3}s`;
+          }, 10);
+        });
+      }
+
+      function fireNeurons(event) {
+        event.stopPropagation();
+        const neurons = event.target
+          .closest(".analogy-card")
+          .querySelectorAll(".neuron");
+        const synapses = event.target
+          .closest(".analogy-card")
+          .querySelectorAll(".synapse");
+
+        neurons.forEach((neuron, index) => {
+          setTimeout(() => {
+            neuron.style.animation = "pulse 0.5s ease 2";
+          }, index * 200);
+        });
+
+        synapses.forEach((synapse, index) => {
+          setTimeout(() => {
+            synapse.style.animation = "signal 0.8s ease 2";
+          }, index * 300);
+        });
+      }
+
+      function scanPattern(event) {
+        event.stopPropagation();
+        const scanner = event.target
+          .closest(".analogy-card")
+          .querySelector(".scanner-filter");
+        const cells = event.target
+          .closest(".analogy-card")
+          .querySelectorAll(".data-cell");
+
+        scanner.style.animation = "none";
+        cells.forEach((cell) => (cell.style.animation = "none"));
+
+        setTimeout(() => {
+          scanner.style.animation = "move-scanner 2s ease";
+          cells.forEach((cell) => {
+            cell.style.animation = "scan 2s ease";
+          });
+        }, 10);
+      }
+
+      // Popup system
+      function showDetails(type) {
+        const popupContent = document.getElementById("popupContent");
+        const overlay = document.getElementById("popupOverlay");
+
+        const details = {
+          svm: {
+            title: "🛡️ SVM - The Perfect Bouncer",
+            content: `
+                        <h2>🎭 The Ultimate Bouncer Analogy</h2>
+                        <p><strong>🏪 The Scene:</strong> "Healthy Hearts Club" - the most exclusive medical club</p>
+                        <p><strong>🛡️ The Bouncer:</strong> SVM is the world's most fair and mathematical bouncer</p>
+                        
+                        <h3>🎯 How the Bouncer Works:</h3>
+                        <ul>
+                            <li><strong>📏 Perfect Rope Line:</strong> Draws the line with maximum space between healthy and diseased patients</li>
+                            <li><strong>⭐ VIP System:</strong> Only listens to "support vectors" - patients right at the boundary</li>
+                            <li><strong>🎪 Magic Tricks:</strong> Uses kernel tricks to handle complex patterns</li>
+                            <li><strong>🛡️ Confidence:</strong> Creates the widest "safety zone" for maximum confidence</li>
+                        </ul>
+
+                        <h3>💪 Bouncer's Superpowers:</h3>
+                        <ul>
+                            <li>🎯 90% accuracy in separating healthy from diseased</li>
+                            <li>🛡️ Robust against outlier patients</li>
+                            <li>📏 Mathematically optimal decision boundary</li>
+                            <li>⚡ Works well even with limited data</li>
+                        </ul>
+
+                        <h3>🏥 Medical Applications:</h3>
+                        <p>Perfect for research environments where maximum accuracy is needed and "black box" decisions are acceptable.</p>
+                    `,
+          },
+          tree: {
+            title: "🌳 Decision Tree - The 20 Questions Master",
+            content: `
+                        <h2>🎮 The Ultimate Medical Game Show</h2>
+                        <p><strong>🎪 The Scene:</strong> "Heart Disease or Healthy: The Medical Game Show"</p>
+                        <p><strong>🌳 The Host:</strong> Dr. TreeHouse - master of perfect questioning</p>
+                        
+                        <h3>🎯 How the Game Works:</h3>
+                        <ul>
+                            <li><strong>🎲 Round 1:</strong> "Is age > 55?" (Most informative question first)</li>
+                            <li><strong>🎲 Round 2:</strong> "Does patient have chest pain?" (Based on Round 1 answer)</li>
+                            <li><strong>🎲 Round 3:</strong> "ST Depression > 2.0?" (Getting more specific)</li>
+                            <li><strong>🏆 Final Answer:</strong> Clear diagnosis with reasoning!</li>
+                        </ul>
+
+                        <h3>🌟 Tree's Superpowers:</h3>
+                        <ul>
+                            <li>💡 100% explainable decisions - every step is clear</li>
+                            <li>⚡ Lightning-fast predictions (milliseconds)</li>
+                            <li>📚 Reads like a medical textbook flowchart</li>
+                            <li>🎯 Shows which symptoms matter most</li>
+                        </ul>
+
+                        <h3>🏥 Medical Applications:</h3>
+                        <p>Perfect for clinical practice where doctors need to understand and explain every decision to patients and colleagues.</p>
+                    `,
+          },
+          nn: {
+            title: "🧠 Neural Network - The Deep Thinker",
+            content: `
+                        <h2>🧠 The Brilliant Medical Student</h2>
+                        <p><strong>🎓 The Scene:</strong> Medical school with the smartest student ever</p>
+                        <p><strong>🧠 The Student:</strong> Neural Network learns from thousands of patient cases</p>
+                        
+                        <h3>🎯 How the Learning Works:</h3>
+                        <ul>
+                            <li><strong>📚 Layer 1:</strong> Studies basic symptoms (age, blood pressure, cholesterol)</li>
+                            <li><strong>🧠 Layer 2:</strong> Combines symptoms into patterns (cardiovascular risk factors)</li>
+                            <li><strong>🎓 Layer 3:</strong> Recognizes complex disease signatures</li>
+                            <li><strong>🏆 Output:</strong> Confident diagnosis with probability score</li>
+                        </ul>
+
+                        <h3>⚡ Neural Network's Superpowers:</h3>
+                        <ul>
+                            <li>🎯 92% accuracy through deep pattern learning</li>
+                            <li>🔄 Automatic discovery of feature relationships</li>
+                            <li>📈 Improves with more training data</li>
+                            <li>🧩 Handles complex non-linear medical relationships</li>
+                        </ul>
+
+                        <h3>🏥 Medical Applications:</h3>
+                        <p>Excellent for research and high-stakes diagnosis where maximum pattern recognition is needed, even if the reasoning is complex.</p>
+                    `,
+          },
+          cnn: {
+            title: "🔍 CNN - The Pattern Scanner",
+            content: `
+                        <h2>🔍 The Medical CSI Detective</h2>
+                        <p><strong>🕵️ The Scene:</strong> CSI: Medical Edition - solving cases through pattern analysis</p>
+                        <p><strong>🔍 The Detective:</strong> CNN scans evidence like reading medical "images"</p>
+                        
+                        <h3>🎯 How the Investigation Works:</h3>
+                        <ul>
+                            <li><strong>📊 Step 1:</strong> Reshapes patient data into a "medical image" grid</li>
+                            <li><strong>🔍 Step 2:</strong> Slides detection filters across the data</li>
+                            <li><strong>🧩 Step 3:</strong> Finds local patterns (age + blood pressure clusters)</li>
+                            <li><strong>🎯 Step 4:</strong> Combines patterns for final diagnosis</li>
+                        </ul>
+
+                        <h3>🔬 CNN's Superpowers:</h3>
+                        <ul>
+                            <li>🎯 94% accuracy - highest of all methods!</li>
+                            <li>🧩 Discovers hidden spatial relationships in medical data</li>
+                            <li>🔍 Detects feature combinations others miss</li>
+                            <li>🎪 Creative interpretation of tabular data as "images"</li>
+                        </ul>
+
+                        <h3>🏥 Medical Applications:</h3>
+                        <p>Experimental but promising for research where maximum accuracy is critical and creative pattern detection is valued over traditional approaches.</p>
+                    `,
+          },
+        };
+
+        popupContent.innerHTML = details[type].content;
+        overlay.style.display = "block";
+      }
+
+      function closePopup() {
+        document.getElementById("popupOverlay").style.display = "none";
+      }
+
+      function showComparison() {
+        const popupContent = document.getElementById("popupContent");
+        const overlay = document.getElementById("popupOverlay");
+
+        popupContent.innerHTML = `
+                <h2>📊 Ultimate ML Algorithm Comparison</h2>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Accuracy</th>
+                        <th>Speed</th>
+                        <th>Interpretability</th>
+                        <th>Best Use Case</th>
+                    </tr>
+                    <tr>
+                        <td>🛡️ SVM</td>
+                        <td>90% 🟡</td>
+                        <td>Moderate 🟡</td>
+                        <td>Low 🔴</td>
+                        <td>Research & High Accuracy</td>
+                    </tr>
+                    <tr>
+                        <td>🌳 Decision Tree</td>
+                        <td>87% 🟡</td>
+                        <td>Very Fast 🟢</td>
+                        <td>Perfect 🟢</td>
+                        <td>Clinical Practice</td>
+                    </tr>
+                    <tr>
+                        <td>🧠 Neural Network</td>
+                        <td>92% 🟢</td>
+                        <td>Moderate 🟡</td>
+                        <td>Very Low 🔴</td>
+                        <td>Complex Pattern Learning</td>
+                    </tr>
+                    <tr>
+                        <td>🔍 CNN</td>
+                        <td>94% 🟢</td>
+                        <td>Slow 🔴</td>
+                        <td>Very Low 🔴</td>
+                        <td>Experimental/Research</td>
+                    </tr>
+                </table>
+                
+                <h3>🏆 The Verdict:</h3>
+                <ul>
+                    <li><strong>🏥 For Doctors:</strong> Decision Tree wins (explainable + fast)</li>
+                    <li><strong>🔬 For Researchers:</strong> CNN wins (maximum accuracy)</li>
+                    <li><strong>⚖️ For Balance:</strong> Neural Network (good accuracy + reasonable speed)</li>
+                    <li><strong>🎯 For Precision:</strong> SVM (robust + reliable)</li>
+                </ul>
+            `;
+
+        overlay.style.display = "block";
+      }
+
+      let tourStep = 0;
+      function startTour() {
+        const cards = document.querySelectorAll(".analogy-card");
+        const titles = ["SVM", "Decision Tree", "Neural Network", "CNN"];
+
+        if (tourStep < cards.length) {
+          // Highlight current card
+          cards.forEach((card) => (card.style.opacity = "0.3"));
+          cards[tourStep].style.opacity = "1";
+          cards[tourStep].style.transform = "scale(1.05)";
+
+          // Show details
+          setTimeout(() => {
+            showDetails(titles[tourStep].toLowerCase().replace(" ", ""));
+            tourStep++;
+
+            if (tourStep >= cards.length) {
+              // Reset tour
+              setTimeout(() => {
+                cards.forEach((card) => {
+                  card.style.opacity = "1";
+                  card.style.transform = "scale(1)";
+                });
+                tourStep = 0;
+              }, 3000);
+            }
+          }, 500);
+        }
+      }
+
+      // Close popup when clicking outside
+      document
+        .getElementById("popupOverlay")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closePopup();
+          }
+        });
+
+      // Initialize particle system
+      createParticles();
+
+      // Add some interactive hover effects
+      document.querySelectorAll(".analogy-card").forEach((card) => {
+        card.addEventListener("mouseenter", function () {
+          this.style.transform = "translateY(-10px) scale(1.02)";
+        });
+
+        card.addEventListener("mouseleave", function () {
+          this.style.transform = "translateY(0) scale(1)";
+        });
+      });
+    </script>
+  </body>
+</html>

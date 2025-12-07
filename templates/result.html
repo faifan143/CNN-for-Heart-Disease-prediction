@@ -566,6 +566,126 @@
         margin-top: 2rem;
         border-left: 4px solid var(--warning-color);
       }
+
+      /* Language Toggle Styles */
+      .language-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+      }
+
+      .toggle-container {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        height: 40px;
+      }
+
+      .toggle-input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        border-radius: 20px;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8rem;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 32px;
+        width: 32px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-input:checked + .toggle-slider:before {
+        transform: translateX(80px);
+      }
+
+      .toggle-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .toggle-label.active {
+        color: var(--primary-color);
+      }
+
+      /* RTL Support for Arabic */
+      .rtl {
+        direction: rtl;
+        text-align: right;
+      }
+
+      .rtl .section-title i {
+        margin-right: 0;
+        margin-left: 0.75rem;
+      }
+
+      .rtl .parameter-icon {
+        margin-right: 0;
+        margin-left: 1rem;
+      }
+
+      .rtl .parameter-label {
+        margin-right: 0;
+        margin-left: 0.5rem;
+      }
+
+      .rtl .model-icon {
+        margin-right: 0;
+        margin-left: 1rem;
+      }
+
+      /* Arabic font support */
+      .arabic-text {
+        font-family: "Segoe UI", "Tahoma", "Arial", sans-serif;
+        line-height: 1.6;
+      }
+
+      /* Fade transition for language switch */
+      .report-section {
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      .report-section.hidden {
+        display: none;
+        opacity: 0;
+      }
+
+      .report-section.visible {
+        display: block;
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
@@ -892,6 +1012,387 @@
               </div>
             </div>
 
+            <!-- Language Toggle -->
+            <div class="language-toggle">
+              <span class="toggle-label" id="englishLabel">English</span>
+              <label class="toggle-container">
+                <input
+                  type="checkbox"
+                  class="toggle-input"
+                  id="languageToggle"
+                />
+                <span class="toggle-slider"> </span>
+              </label>
+              <span class="toggle-label" id="arabicLabel">العربية</span>
+            </div>
+
+            <!-- English Personalized Report Section -->
+            <div id="englishReport" class="report-section visible">
+              <h4 class="section-title mt-5">
+                <i class="bi bi-clipboard-pulse"></i>Personalized Report
+              </h4>
+              <div
+                class="report-content p-4 mb-4 rounded"
+                style="background: #f8f9fa; border: 1px solid #e9ecef"
+              >
+                <h5 class="mb-3">🩺 Summary of Findings</h5>
+                <ul class="list-group mb-3">
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>Age:</span>
+                    <span>
+                      <strong
+                        class="{% if data.age > 60 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.age }}</strong
+                      >
+                      <small class="text-muted ms-2">(Normal: ≤ 60)</small>
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>Cholesterol:</span>
+                    <span>
+                      <strong
+                        class="{% if data.chol > 240 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.chol }}</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(Normal: &lt; 200 mg/dL)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>Resting BP:</span>
+                    <span>
+                      <strong
+                        class="{% if data.trestbps > 130 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.trestbps }}</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(Normal: &lt; 130 mmHg)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>Fasting Blood Sugar:</span>
+                    <span>
+                      <strong
+                        class="{% if data.fbs == 1 %}text-danger{% else %}text-success{% endif %}"
+                        >{% if data.fbs == 1 %}High{% else %}Normal{% endif
+                        %}</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(Normal: &lt; 120 mg/dL)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>Max Heart Rate:</span>
+                    <span>
+                      <strong
+                        class="{% if data.thalach < 150 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.thalach }} bpm</strong
+                      >
+                      <small class="text-muted ms-2">(Normal: ≥ 150 bpm)</small>
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>ST Depression (oldpeak):</span>
+                    <span>
+                      <strong
+                        class="{% if data.oldpeak > 1.5 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.oldpeak }}</strong
+                      >
+                      <small class="text-muted ms-2">(Normal: ≤ 1.5)</small>
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>Major Vessels (ca):</span>
+                    <span>
+                      <strong
+                        class="{% if data.ca > 0 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.ca }}</strong
+                      >
+                      <small class="text-muted ms-2">(Normal: 0)</small>
+                    </span>
+                  </li>
+                </ul>
+                <h5 class="mb-2">⚠️ High Risk Factors Detected:</h5>
+                <ul>
+                  {% if data.age > 60 %}
+                  <li>Age above 60 increases risk for heart disease.</li>
+                  {% endif %} {% if data.chol > 240 %}
+                  <li>Cholesterol above 240 mg/dL is considered high risk.</li>
+                  {% endif %} {% if data.trestbps > 130 %}
+                  <li>Resting blood pressure above 130 mmHg is high.</li>
+                  {% endif %} {% if data.fbs == 1 %}
+                  <li>
+                    High fasting blood sugar (&gt; 120 mg/dL) is a risk factor.
+                  </li>
+                  {% endif %} {% if data.thalach < 150 %}
+                  <li>
+                    Low max heart rate may indicate reduced cardiac fitness.
+                  </li>
+                  {% endif %} {% if data.oldpeak > 1.5 %}
+                  <li>ST depression above 1.5 suggests possible ischemia.</li>
+                  {% endif %} {% if data.ca > 0 %}
+                  <li>
+                    Presence of major vessels colored by fluoroscopy is
+                    abnormal.
+                  </li>
+                  {% endif %} {% if not (data.age > 60 or data.chol > 240 or
+                  data.trestbps > 130 or data.fbs == 1 or data.thalach < 150 or
+                  data.oldpeak > 1.5 or data.ca > 0) %}
+                  <li>
+                    No major high risk factors detected in the provided data.
+                  </li>
+                  {% endif %}
+                </ul>
+                <h5 class="mb-2">💡 Advice & Next Steps:</h5>
+                <ul>
+                  <li>
+                    Consult a cardiologist for a comprehensive evaluation.
+                  </li>
+                  <li>
+                    Maintain a healthy diet low in saturated fats and
+                    cholesterol.
+                  </li>
+                  <li>
+                    Engage in regular physical activity (as advised by your
+                    doctor).
+                  </li>
+                  <li>
+                    Monitor blood pressure, cholesterol, and blood sugar
+                    regularly.
+                  </li>
+                  <li>Avoid smoking and limit alcohol consumption.</li>
+                  <li>
+                    Manage stress through relaxation techniques or counseling.
+                  </li>
+                  <li>Follow prescribed medications and treatment plans.</li>
+                </ul>
+                <h5 class="mb-2">📝 What Might Cause These Risks?</h5>
+                <ul>
+                  <li><strong>High Age:</strong> Natural aging, genetics.</li>
+                  <li>
+                    <strong>High Cholesterol:</strong> Diet, genetics, lack of
+                    exercise.
+                  </li>
+                  <li>
+                    <strong>High BP:</strong> Salt intake, stress, obesity,
+                    genetics.
+                  </li>
+                  <li>
+                    <strong>High Blood Sugar:</strong> Diabetes, poor diet,
+                    inactivity.
+                  </li>
+                  <li>
+                    <strong>Low Max HR:</strong> Age, heart conditions,
+                    medications.
+                  </li>
+                  <li>
+                    <strong>High ST Depression:</strong> Ischemia, heart strain.
+                  </li>
+                  <li>
+                    <strong>Major Vessels:</strong> Coronary artery disease.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Arabic Personalized Report Section -->
+            <div
+              id="arabicReport"
+              class="report-section hidden rtl arabic-text"
+            >
+              <h4 class="section-title mt-5">
+                <i class="bi bi-clipboard-pulse"></i>التقرير الشخصي
+              </h4>
+              <div
+                class="report-content p-4 mb-4 rounded"
+                style="background: #f8f9fa; border: 1px solid #e9ecef"
+              >
+                <h5 class="mb-3">🩺 ملخص النتائج</h5>
+                <ul class="list-group mb-3">
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>العمر:</span>
+                    <span>
+                      <strong
+                        class="{% if data.age > 60 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.age }}</strong
+                      >
+                      <small class="text-muted ms-2">(طبيعي: ≤ 60)</small>
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>الكوليسترول:</span>
+                    <span>
+                      <strong
+                        class="{% if data.chol > 240 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.chol }}</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(طبيعي: &lt; 200 ملغ/ديسيلتر)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>ضغط الدم أثناء الراحة:</span>
+                    <span>
+                      <strong
+                        class="{% if data.trestbps > 130 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.trestbps }}</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(طبيعي: &lt; 130 مم زئبق)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>سكر الدم الصيامي:</span>
+                    <span>
+                      <strong
+                        class="{% if data.fbs == 1 %}text-danger{% else %}text-success{% endif %}"
+                        >{% if data.fbs == 1 %}مرتفع{% else %}طبيعي{% endif
+                        %}</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(طبيعي: &lt; 120 ملغ/ديسيلتر)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>أقصى معدل ضربات القلب:</span>
+                    <span>
+                      <strong
+                        class="{% if data.thalach < 150 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.thalach }} نبضة/دقيقة</strong
+                      >
+                      <small class="text-muted ms-2"
+                        >(طبيعي: ≥ 150 نبضة/دقيقة)</small
+                      >
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>انخفاض ST:</span>
+                    <span>
+                      <strong
+                        class="{% if data.oldpeak > 1.5 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.oldpeak }}</strong
+                      >
+                      <small class="text-muted ms-2">(طبيعي: ≤ 1.5)</small>
+                    </span>
+                  </li>
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>الأوعية الدموية الرئيسية:</span>
+                    <span>
+                      <strong
+                        class="{% if data.ca > 0 %}text-danger{% else %}text-success{% endif %}"
+                        >{{ data.ca }}</strong
+                      >
+                      <small class="text-muted ms-2">(طبيعي: 0)</small>
+                    </span>
+                  </li>
+                </ul>
+                <h5 class="mb-2">⚠️ عوامل الخطر المُكتشفة:</h5>
+                <ul>
+                  {% if data.age > 60 %}
+                  <li>العمر فوق 60 سنة يزيد من خطر الإصابة بأمراض القلب.</li>
+                  {% endif %} {% if data.chol > 240 %}
+                  <li>الكوليسترول فوق 240 ملغ/ديسيلتر يُعتبر عالي الخطورة.</li>
+                  {% endif %} {% if data.trestbps > 130 %}
+                  <li>ضغط الدم أثناء الراحة فوق 130 مم زئبق مرتفع.</li>
+                  {% endif %} {% if data.fbs == 1 %}
+                  <li>ارتفاع سكر الدم الصيامي (> 120 ملغ/ديسيلتر) عامل خطر.</li>
+                  {% endif %} {% if data.thalach < 150 %}
+                  <li>
+                    انخفاض أقصى معدل ضربات القلب قد يشير إلى ضعف اللياقة
+                    القلبية.
+                  </li>
+                  {% endif %} {% if data.oldpeak > 1.5 %}
+                  <li>انخفاض ST فوق 1.5 يشير إلى احتمالية نقص التروية.</li>
+                  {% endif %} {% if data.ca > 0 %}
+                  <li>
+                    وجود أوعية دموية رئيسية ملونة بالفلوروسكوبي غير طبيعي.
+                  </li>
+                  {% endif %} {% if not (data.age > 60 or data.chol > 240 or
+                  data.trestbps > 130 or data.fbs == 1 or data.thalach < 150 or
+                  data.oldpeak > 1.5 or data.ca > 0) %}
+                  <li>لم يتم اكتشاف عوامل خطر رئيسية في البيانات المُقدمة.</li>
+                  {% endif %}
+                </ul>
+                <h5 class="mb-2">💡 النصائح والخطوات التالية:</h5>
+                <ul>
+                  <li>استشر طبيب القلب لإجراء تقييم شامل.</li>
+                  <li>
+                    حافظ على نظام غذائي صحي قليل الدهون المشبعة والكوليسترول.
+                  </li>
+                  <li>مارس النشاط البدني المنتظم (حسب نصيحة طبيبك).</li>
+                  <li>راقب ضغط الدم والكوليسترول وسكر الدم بانتظام.</li>
+                  <li>تجنب التدخين وقلل من استهلاك الكحول.</li>
+                  <li>
+                    تعامل مع التوتر من خلال تقنيات الاسترخاء أو الاستشارة.
+                  </li>
+                  <li>اتبع الأدوية الموصوفة وخطط العلاج.</li>
+                </ul>
+                <h5 class="mb-2">📝 ما قد يسبب هذه المخاطر؟</h5>
+                <ul>
+                  <li>
+                    <strong>العمر المتقدم:</strong> الشيخوخة الطبيعية، الوراثة.
+                  </li>
+                  <li>
+                    <strong>الكوليسترول المرتفع:</strong> النظام الغذائي،
+                    الوراثة، قلة الرياضة.
+                  </li>
+                  <li>
+                    <strong>ضغط الدم المرتفع:</strong> تناول الملح، التوتر،
+                    السمنة، الوراثة.
+                  </li>
+                  <li>
+                    <strong>سكر الدم المرتفع:</strong> السكري، النظام الغذائي
+                    السيء، قلة النشاط.
+                  </li>
+                  <li>
+                    <strong>انخفاض أقصى معدل ضربات القلب:</strong> العمر، أمراض
+                    القلب، الأدوية.
+                  </li>
+                  <li>
+                    <strong>ارتفاع انخفاض ST:</strong> نقص التروية، إجهاد القلب.
+                  </li>
+                  <li>
+                    <strong>الأوعية الدموية الرئيسية:</strong> مرض الشريان
+                    التاجي.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
             <!-- Disclaimer -->
             <div class="disclaimer-card mt-4">
               <div class="d-flex align-items-center">
@@ -926,6 +1427,42 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      // Language toggle functionality
+      const languageToggle = document.getElementById("languageToggle");
+      const englishReport = document.getElementById("englishReport");
+      const arabicReport = document.getElementById("arabicReport");
+      const englishLabel = document.getElementById("englishLabel");
+      const arabicLabel = document.getElementById("arabicLabel");
+
+      // Set initial state
+      updateLanguageDisplay();
+
+      languageToggle.addEventListener("change", function () {
+        updateLanguageDisplay();
+      });
+
+      function updateLanguageDisplay() {
+        if (languageToggle.checked) {
+          // Show Arabic
+          englishReport.classList.remove("visible");
+          englishReport.classList.add("hidden");
+          arabicReport.classList.remove("hidden");
+          arabicReport.classList.add("visible");
+
+          englishLabel.classList.remove("active");
+          arabicLabel.classList.add("active");
+        } else {
+          // Show English
+          arabicReport.classList.remove("visible");
+          arabicReport.classList.add("hidden");
+          englishReport.classList.remove("hidden");
+          englishReport.classList.add("visible");
+
+          arabicLabel.classList.remove("active");
+          englishLabel.classList.add("active");
+        }
+      }
+
       // Add animation to progress bars when page loads
       document.addEventListener("DOMContentLoaded", function () {
         // Wait a short moment before starting animations

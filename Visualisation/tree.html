@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heart Disease Decision Tree - Pure HTML/CSS</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 2.8em;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #27ae60;
+        margin-bottom: 30px;
+        font-size: 1.4em;
+        font-weight: 600;
+      }
+
+      .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .tree-wrapper {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        padding: 40px;
+        margin: 30px 0;
+        box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        position: relative;
+      }
+
+      .tree-container {
+        position: relative;
+        width: 4000px;
+        height: 2200px;
+        margin: 0 auto;
+      }
+
+      .tree-node {
+        position: absolute;
+        background: linear-gradient(145deg, #ffffff, #f1f3f4);
+        border: 3px solid #3498db;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        min-width: 180px;
+        max-width: 220px;
+        z-index: 10;
+      }
+
+      .tree-node:hover {
+        transform: translateY(-8px) scale(1.05);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        border-color: #e74c3c;
+      }
+
+      .tree-node.leaf-healthy {
+        background: linear-gradient(145deg, #d5f4e6, #a8e6cf);
+        border-color: #27ae60;
+        color: #1e7e34;
+      }
+
+      .tree-node.leaf-disease {
+        background: linear-gradient(145deg, #ffeaa7, #fab1a0);
+        border-color: #e74c3c;
+        color: #c0392b;
+      }
+
+      .tree-node.leaf-healthy:hover {
+        border-color: #1e7e34;
+        box-shadow: 0 20px 40px rgba(39, 174, 96, 0.3);
+      }
+
+      .tree-node.leaf-disease:hover {
+        border-color: #c0392b;
+        box-shadow: 0 20px 40px rgba(231, 76, 60, 0.3);
+      }
+
+      .node-title {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-bottom: 8px;
+        line-height: 1.2;
+      }
+
+      .node-condition {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin-bottom: 6px;
+      }
+
+      .node-samples {
+        font-size: 0.8rem;
+        color: #95a5a6;
+      }
+
+      .connection {
+        position: absolute;
+        z-index: 6;
+        pointer-events: none;
+      }
+
+      .connection-line {
+        position: absolute;
+        background: linear-gradient(90deg, #3498db, #2980b9);
+        border-radius: 2px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+        z-index: 5;
+        opacity: 0.9;
+      }
+
+      .connection-true .connection-line {
+        background: linear-gradient(90deg, #27ae60, #2ecc71);
+        height: 5px;
+        box-shadow: 0 3px 8px rgba(39, 174, 96, 0.4);
+      }
+
+      .connection-false .connection-line {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+        height: 5px;
+        box-shadow: 0 3px 8px rgba(231, 76, 60, 0.4);
+      }
+
+      .connection-label {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.98);
+        color: #2c3e50;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 2px solid;
+        white-space: nowrap;
+        z-index: 9;
+        transform: translateX(-50%);
+      }
+
+      .connection-true .connection-label {
+        border-color: #27ae60;
+        color: #27ae60;
+      }
+
+      .connection-false .connection-label {
+        border-color: #e74c3c;
+        color: #e74c3c;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .control-btn {
+        padding: 12px 24px;
+        background: linear-gradient(145deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .control-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        background: linear-gradient(145deg, #2980b9, #3498db);
+      }
+
+      .control-btn.active {
+        background: linear-gradient(145deg, #e74c3c, #c0392b);
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+      }
+
+      .legend {
+        background: linear-gradient(145deg, #fff3cd, #ffeaa7);
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 6px solid #f39c12;
+        margin-top: 30px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .legend h3 {
+        color: #b7720c;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+      }
+
+      .legend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .legend-section {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 15px;
+        border-radius: 10px;
+      }
+
+      .legend-section h4 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .legend-section ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .legend-section li {
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .legend-section li:before {
+        content: "▶";
+        position: absolute;
+        left: 0;
+        color: #3498db;
+        font-weight: bold;
+      }
+
+      .tooltip {
+        position: absolute;
+        background: rgba(44, 62, 80, 0.95);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        pointer-events: none;
+        z-index: 1000;
+        max-width: 300px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border: 2px solid #3498db;
+        display: none;
+        backdrop-filter: blur(10px);
+      }
+
+      .info-panel {
+        background: linear-gradient(145deg, #d1ecf1, #bee5eb);
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 6px solid #17a2b8;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .info-panel h3 {
+        color: #0c5460;
+        margin-bottom: 15px;
+      }
+
+      .info-panel p {
+        color: #495057;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      @keyframes nodeAppear {
+        from {
+          opacity: 0;
+          transform: scale(0.5) translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .tree-node {
+        animation: nodeAppear 0.6s ease-out forwards;
+      }
+
+      .zoom-controls {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+      }
+
+      .zoom-btn {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(145deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .zoom-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="tree-wrapper">
+        <div class="tree-container" id="treeContainer">
+          <!-- Root Node -->
+          <div
+            class="tree-node"
+            style="left: 1900px; top: 50px"
+            data-feature="Chest Pain Type"
+            data-threshold="0.50"
+            data-samples="1025"
+          >
+            <div class="node-title">Chest Pain Type</div>
+            <div class="node-condition">≤ 0.50</div>
+            <div class="node-samples">1025 patients</div>
+          </div>
+
+          <!-- Level 1 Nodes -->
+          <div
+            class="tree-node"
+            style="left: 900px; top: 250px"
+            data-feature="Major Vessels"
+            data-threshold="0.50"
+            data-samples="497"
+          >
+            <div class="node-title">Major Vessels (0-3)</div>
+            <div class="node-condition">≤ 0.50</div>
+            <div class="node-samples">497 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2900px; top: 250px"
+            data-feature="Age"
+            data-threshold="56.50"
+            data-samples="528"
+          >
+            <div class="node-title">Age</div>
+            <div class="node-condition">≤ 56.50</div>
+            <div class="node-samples">528 patients</div>
+          </div>
+
+          <!-- Level 2 Nodes -->
+          <div
+            class="tree-node"
+            style="left: 400px; top: 450px"
+            data-feature="Thalassemia"
+            data-threshold="2.50"
+            data-samples="219"
+          >
+            <div class="node-title">Thalassemia</div>
+            <div class="node-condition">≤ 2.50</div>
+            <div class="node-samples">219 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 1400px; top: 450px"
+            data-feature="Resting BP"
+            data-threshold="109.00"
+            data-samples="278"
+          >
+            <div class="node-title">Resting Blood Pressure</div>
+            <div class="node-condition">≤ 109.00</div>
+            <div class="node-samples">278 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2400px; top: 450px"
+            data-feature="ST Depression"
+            data-threshold="3.55"
+            data-samples="320"
+          >
+            <div class="node-title">ST Depression</div>
+            <div class="node-condition">≤ 3.55</div>
+            <div class="node-samples">320 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3400px; top: 450px"
+            data-feature="Sex"
+            data-threshold="0.50"
+            data-samples="208"
+          >
+            <div class="node-title">Sex (0=F, 1=M)</div>
+            <div class="node-condition">≤ 0.50</div>
+            <div class="node-samples">208 patients</div>
+          </div>
+
+          <!-- Level 3 Nodes -->
+          <div
+            class="tree-node"
+            style="left: 200px; top: 650px"
+            data-feature="Exercise Angina"
+            data-threshold="0.50"
+            data-samples="125"
+          >
+            <div class="node-title">Exercise Angina</div>
+            <div class="node-condition">≤ 0.50</div>
+            <div class="node-samples">125 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 600px; top: 650px"
+            data-feature="ST Depression"
+            data-threshold="0.65"
+            data-samples="94"
+          >
+            <div class="node-title">ST Depression</div>
+            <div class="node-condition">≤ 0.65</div>
+            <div class="node-samples">94 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 1200px; top: 650px"
+            data-feature="Cholesterol"
+            data-threshold="233.50"
+            data-samples="17"
+          >
+            <div class="node-title">Cholesterol</div>
+            <div class="node-condition">≤ 233.50</div>
+            <div class="node-samples">17 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 1600px; top: 650px"
+            data-feature="Cholesterol"
+            data-threshold="301.50"
+            data-samples="261"
+          >
+            <div class="node-title">Cholesterol</div>
+            <div class="node-condition">≤ 301.50</div>
+            <div class="node-samples">261 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2200px; top: 650px"
+            data-feature="Max Heart Rate"
+            data-threshold="142.50"
+            data-samples="313"
+          >
+            <div class="node-title">Max Heart Rate</div>
+            <div class="node-condition">≤ 142.50</div>
+            <div class="node-samples">313 patients</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 2600px; top: 650px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">7 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3200px; top: 650px"
+            data-feature="Age"
+            data-threshold="62.50"
+            data-samples="77"
+          >
+            <div class="node-title">Age</div>
+            <div class="node-condition">≤ 62.50</div>
+            <div class="node-samples">77 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3600px; top: 650px"
+            data-feature="Cholesterol"
+            data-threshold="245.50"
+            data-samples="131"
+          >
+            <div class="node-title">Cholesterol</div>
+            <div class="node-condition">≤ 245.50</div>
+            <div class="node-samples">131 patients</div>
+          </div>
+
+          <!-- Sample Leaf Nodes (Level 4+) -->
+          <div class="tree-node leaf-healthy" style="left: 50px; top: 850px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">4 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 250px; top: 850px"
+            data-feature="Cholesterol"
+            data-threshold="316.50"
+            data-samples="75"
+          >
+            <div class="node-title">Cholesterol</div>
+            <div class="node-condition">≤ 316.50</div>
+            <div class="node-samples">75 patients</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 450px; top: 850px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">12 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 650px; top: 850px"
+            data-feature="Age"
+            data-threshold="42.00"
+            data-samples="31"
+          >
+            <div class="node-title">Age</div>
+            <div class="node-condition">≤ 42.00</div>
+            <div class="node-samples">31 patients</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 850px; top: 850px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">63 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 1100px; top: 850px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">6 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 1300px; top: 850px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">11 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 1500px; top: 850px"
+            data-feature="Max Heart Rate"
+            data-threshold="105.50"
+            data-samples="218"
+          >
+            <div class="node-title">Max Heart Rate</div>
+            <div class="node-condition">≤ 105.50</div>
+            <div class="node-samples">218 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 1700px; top: 850px"
+            data-feature="Cholesterol"
+            data-threshold="303.50"
+            data-samples="43"
+          >
+            <div class="node-title">Cholesterol</div>
+            <div class="node-condition">≤ 303.50</div>
+            <div class="node-samples">43 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2100px; top: 850px"
+            data-feature="Major Vessels"
+            data-threshold="2.00"
+            data-samples="37"
+          >
+            <div class="node-title">Major Vessels (0-3)</div>
+            <div class="node-condition">≤ 2.00</div>
+            <div class="node-samples">37 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2300px; top: 850px"
+            data-feature="Resting BP"
+            data-threshold="182.00"
+            data-samples="276"
+          >
+            <div class="node-title">Resting Blood Pressure</div>
+            <div class="node-condition">≤ 182.00</div>
+            <div class="node-samples">276 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3100px; top: 850px"
+            data-feature="Major Vessels"
+            data-threshold="0.50"
+            data-samples="27"
+          >
+            <div class="node-title">Major Vessels (0-3)</div>
+            <div class="node-condition">≤ 0.50</div>
+            <div class="node-samples">27 patients</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 3300px; top: 850px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">50 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3500px; top: 850px"
+            data-feature="ST Depression"
+            data-threshold="2.40"
+            data-samples="82"
+          >
+            <div class="node-title">ST Depression</div>
+            <div class="node-condition">≤ 2.40</div>
+            <div class="node-samples">82 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3700px; top: 850px"
+            data-feature="Resting BP"
+            data-threshold="119.00"
+            data-samples="49"
+          >
+            <div class="node-title">Resting Blood Pressure</div>
+            <div class="node-condition">≤ 119.00</div>
+            <div class="node-samples">49 patients</div>
+          </div>
+
+          <!-- More detailed nodes at deeper levels -->
+          <div class="tree-node leaf-disease" style="left: 100px; top: 1050px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">68 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 300px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">7 patients</div>
+            <div class="node-samples">57% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 500px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">10 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 700px; top: 1050px"
+            data-feature="Cholesterol"
+            data-threshold="237.50"
+            data-samples="21"
+          >
+            <div class="node-title">Cholesterol</div>
+            <div class="node-condition">≤ 237.50</div>
+            <div class="node-samples">21 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 1400px; top: 1050px"
+            data-feature="ST Depression"
+            data-threshold="0.60"
+            data-samples="27"
+          >
+            <div class="node-title">ST Depression</div>
+            <div class="node-condition">≤ 0.60</div>
+            <div class="node-samples">27 patients</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 1600px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">191 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 1800px; top: 1050px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">6 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 2000px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">37 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2200px; top: 1050px"
+            data-feature="Age"
+            data-threshold="54.50"
+            data-samples="29"
+          >
+            <div class="node-title">Age</div>
+            <div class="node-condition">≤ 54.50</div>
+            <div class="node-samples">29 patients</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 2400px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">8 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 2600px; top: 1050px"
+            data-feature="Resting BP"
+            data-threshold="111.00"
+            data-samples="273"
+          >
+            <div class="node-title">Resting Blood Pressure</div>
+            <div class="node-condition">≤ 111.00</div>
+            <div class="node-samples">273 patients</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 2800px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">3 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 3000px; top: 1050px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">13 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3200px; top: 1050px"
+            data-feature="Resting BP"
+            data-threshold="116.00"
+            data-samples="14"
+          >
+            <div class="node-title">Resting Blood Pressure</div>
+            <div class="node-condition">≤ 116.00</div>
+            <div class="node-samples">14 patients</div>
+          </div>
+
+          <div
+            class="tree-node"
+            style="left: 3400px; top: 1050px"
+            data-feature="Major Vessels"
+            data-threshold="0.50"
+            data-samples="68"
+          >
+            <div class="node-title">Major Vessels (0-3)</div>
+            <div class="node-condition">≤ 0.50</div>
+            <div class="node-samples">68 patients</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 3600px; top: 1050px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">14 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 3800px; top: 1050px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">3 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <!-- Final level leaf nodes -->
+          <div class="tree-node leaf-disease" style="left: 600px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">15 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 800px; top: 1250px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">6 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 1300px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">3 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 1500px; top: 1250px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">24 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 2100px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">25 patients</div>
+            <div class="node-samples">88% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 2300px; top: 1250px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">4 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 2500px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">44 patients</div>
+            <div class="node-samples">82% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 2700px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">229 patients</div>
+            <div class="node-samples">99% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 3100px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">3 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 3300px; top: 1250px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">11 patients</div>
+            <div class="node-samples">100% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-disease" style="left: 3500px; top: 1250px">
+            <div class="node-title">❤️ Heart Disease</div>
+            <div class="node-condition">39 patients</div>
+            <div class="node-samples">90% confidence</div>
+          </div>
+
+          <div class="tree-node leaf-healthy" style="left: 3700px; top: 1250px">
+            <div class="node-title">💚 No Heart Disease</div>
+            <div class="node-condition">29 patients</div>
+            <div class="node-samples">55% confidence</div>
+          </div>
+
+          <!-- Connection lines will be added via JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentZoom = 1;
+
+      // Add hover tooltips
+      document.querySelectorAll(".tree-node").forEach((node) => {
+        node.addEventListener("mouseenter", function (e) {
+          const tooltip = document.getElementById("tooltip");
+          const feature = this.dataset.feature;
+          const threshold = this.dataset.threshold;
+          const samples = this.dataset.samples;
+
+          let content = "";
+          if (feature) {
+            content = `
+                        <strong>Feature:</strong> ${feature}<br>
+                        <strong>Threshold:</strong> ≤ ${threshold}<br>
+                        <strong>Samples:</strong> ${samples} patients<br>
+                        <strong>Decision:</strong> Split patients based on this condition
+                    `;
+          } else {
+            const title = this.querySelector(".node-title").textContent;
+            const condition = this.querySelector(".node-condition").textContent;
+            const confidence = this.querySelector(".node-samples").textContent;
+            content = `
+                        <strong>Prediction:</strong> ${title}<br>
+                        <strong>Patients:</strong> ${condition}<br>
+                        <strong>Confidence:</strong> ${confidence}
+                    `;
+          }
+
+          tooltip.innerHTML = content;
+          tooltip.style.display = "block";
+          tooltip.style.left = e.pageX + 15 + "px";
+          tooltip.style.top = e.pageY - 15 + "px";
+        });
+
+        node.addEventListener("mouseleave", function () {
+          document.getElementById("tooltip").style.display = "none";
+        });
+      });
+
+      // Control functions
+      function showAll() {
+        document.querySelectorAll(".tree-node").forEach((node) => {
+          node.style.opacity = "1";
+          node.style.transform = "scale(1)";
+        });
+        setActiveButton(0);
+      }
+
+      function highlightHealthy() {
+        document.querySelectorAll(".tree-node").forEach((node) => {
+          if (node.classList.contains("leaf-healthy")) {
+            node.style.opacity = "1";
+            node.style.transform = "scale(1.1)";
+          } else {
+            node.style.opacity = "0.3";
+            node.style.transform = "scale(0.95)";
+          }
+        });
+        setActiveButton(1);
+      }
+
+      function highlightDisease() {
+        document.querySelectorAll(".tree-node").forEach((node) => {
+          if (node.classList.contains("leaf-disease")) {
+            node.style.opacity = "1";
+            node.style.transform = "scale(1.1)";
+          } else {
+            node.style.opacity = "0.3";
+            node.style.transform = "scale(0.95)";
+          }
+        });
+        setActiveButton(2);
+      }
+
+      function resetView() {
+        showAll();
+        currentZoom = 1;
+        applyZoom();
+        setActiveButton(3);
+      }
+
+      function setActiveButton(index) {
+        document.querySelectorAll(".control-btn").forEach((btn, i) => {
+          btn.classList.toggle("active", i === index);
+        });
+      }
+
+      function zoomIn() {
+        currentZoom = Math.min(currentZoom * 1.2, 3);
+        applyZoom();
+      }
+
+      function zoomOut() {
+        currentZoom = Math.max(currentZoom / 1.2, 0.3);
+        applyZoom();
+      }
+
+      function resetZoom() {
+        currentZoom = 1;
+        applyZoom();
+      }
+
+      function applyZoom() {
+        const container = document.getElementById("treeContainer");
+        container.style.transform = `scale(${currentZoom})`;
+        container.style.transformOrigin = "center top";
+      }
+
+      // Create connection lines between nodes
+      function createConnections() {
+        const connections = [
+          // Root to Level 1
+          {
+            from: { x: 1990, y: 120 },
+            to: { x: 990, y: 250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1990, y: 120 },
+            to: { x: 2990, y: 250 },
+            type: "false",
+            label: "FALSE",
+          },
+
+          // Level 1 to Level 2
+          {
+            from: { x: 990, y: 320 },
+            to: { x: 490, y: 450 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 990, y: 320 },
+            to: { x: 1490, y: 450 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2990, y: 320 },
+            to: { x: 2490, y: 450 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2990, y: 320 },
+            to: { x: 3490, y: 450 },
+            type: "false",
+            label: "FALSE",
+          },
+
+          // Level 2 to Level 3
+          {
+            from: { x: 490, y: 520 },
+            to: { x: 290, y: 650 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 490, y: 520 },
+            to: { x: 690, y: 650 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 1490, y: 520 },
+            to: { x: 1290, y: 650 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1490, y: 520 },
+            to: { x: 1690, y: 650 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2490, y: 520 },
+            to: { x: 2290, y: 650 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2490, y: 520 },
+            to: { x: 2690, y: 650 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3490, y: 520 },
+            to: { x: 3290, y: 650 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3490, y: 520 },
+            to: { x: 3690, y: 650 },
+            type: "false",
+            label: "FALSE",
+          },
+
+          // Level 3 to Level 4
+          {
+            from: { x: 290, y: 720 },
+            to: { x: 140, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 290, y: 720 },
+            to: { x: 340, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 690, y: 720 },
+            to: { x: 540, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 690, y: 720 },
+            to: { x: 940, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 1290, y: 720 },
+            to: { x: 1190, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1290, y: 720 },
+            to: { x: 1390, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 1690, y: 720 },
+            to: { x: 1590, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1690, y: 720 },
+            to: { x: 1790, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2290, y: 720 },
+            to: { x: 2190, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2290, y: 720 },
+            to: { x: 2390, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3290, y: 720 },
+            to: { x: 3190, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3290, y: 720 },
+            to: { x: 3390, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3690, y: 720 },
+            to: { x: 3590, y: 850 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3690, y: 720 },
+            to: { x: 3790, y: 850 },
+            type: "false",
+            label: "FALSE",
+          },
+
+          // Level 4 to Level 5
+          {
+            from: { x: 340, y: 920 },
+            to: { x: 190, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 340, y: 920 },
+            to: { x: 390, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 740, y: 920 },
+            to: { x: 590, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 740, y: 920 },
+            to: { x: 790, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 1590, y: 920 },
+            to: { x: 1490, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1590, y: 920 },
+            to: { x: 1690, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 1790, y: 920 },
+            to: { x: 1890, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1790, y: 920 },
+            to: { x: 2090, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2190, y: 920 },
+            to: { x: 2290, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2190, y: 920 },
+            to: { x: 2490, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2390, y: 920 },
+            to: { x: 2690, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2390, y: 920 },
+            to: { x: 2890, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3190, y: 920 },
+            to: { x: 3090, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3190, y: 920 },
+            to: { x: 3290, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3590, y: 920 },
+            to: { x: 3490, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3590, y: 920 },
+            to: { x: 3690, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3790, y: 920 },
+            to: { x: 3890, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+
+          // Level 5 to Level 6 (Final leaf connections)
+          {
+            from: { x: 790, y: 1120 },
+            to: { x: 690, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 790, y: 1120 },
+            to: { x: 890, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 1490, y: 1120 },
+            to: { x: 1390, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 1490, y: 1120 },
+            to: { x: 1590, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2290, y: 1120 },
+            to: { x: 2190, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2290, y: 1120 },
+            to: { x: 2390, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 2690, y: 1120 },
+            to: { x: 2590, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2690, y: 1120 },
+            to: { x: 2790, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3290, y: 1120 },
+            to: { x: 3190, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3290, y: 1120 },
+            to: { x: 3390, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3490, y: 1120 },
+            to: { x: 3590, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 3490, y: 1120 },
+            to: { x: 3790, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+
+          // Additional connections for remaining nodes
+          {
+            from: { x: 540, y: 920 },
+            to: { x: 590, y: 1050 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 540, y: 920 },
+            to: { x: 790, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+          {
+            from: { x: 3390, y: 920 },
+            to: { x: 3490, y: 1050 },
+            type: "false",
+            label: "FALSE",
+          },
+
+          // More connections to complete the tree
+          {
+            from: { x: 1890, y: 1120 },
+            to: { x: 1890, y: 1250 },
+            type: "true",
+            label: "TRUE",
+          },
+          {
+            from: { x: 2090, y: 1120 },
+            to: { x: 2190, y: 1250 },
+            type: "false",
+            label: "FALSE",
+          },
+        ];
+
+        connections.forEach((conn) => {
+          createConnectionLine(conn.from, conn.to, conn.type, conn.label);
+        });
+
+        // Add additional visual enhancements
+        addConnectionEnhancements();
+      }
+
+      function addConnectionEnhancements() {
+        // Add subtle glow effects to connections
+        const connections = document.querySelectorAll(".connection-line");
+        connections.forEach((line) => {
+          line.style.filter = "drop-shadow(0 0 3px rgba(52, 152, 219, 0.3))";
+        });
+      }
+
+      function createConnectionLine(from, to, type, labelText) {
+        const container = document.getElementById("treeContainer");
+
+        // Calculate line properties
+        const deltaX = to.x - from.x;
+        const deltaY = to.y - from.y;
+        const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const angle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
+
+        // Create connection div
+        const connection = document.createElement("div");
+        connection.className = `connection connection-${type}`;
+
+        // Create line
+        const line = document.createElement("div");
+        line.className = "connection-line";
+        line.style.width = length + "px";
+        line.style.height = "3px";
+        line.style.left = from.x + "px";
+        line.style.top = from.y + "px";
+        line.style.transform = `rotate(${angle}deg)`;
+        line.style.transformOrigin = "0 50%";
+
+        // Create label
+        const label = document.createElement("div");
+        label.className = "connection-label";
+        label.textContent = labelText;
+        label.style.left = from.x + deltaX * 0.4 + "px";
+        label.style.top = from.y + deltaY * 0.4 - 12 + "px";
+        label.style.transform =
+          deltaX < 0 ? "translateX(-50%)" : "translateX(-30%)";
+
+        connection.appendChild(line);
+        connection.appendChild(label);
+        container.appendChild(connection);
+      }
+
+      // Initialize connections on load with a slight delay for better rendering
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          createConnections();
+        }, 300);
+      });
+    </script>
+  </body>
+</html>
